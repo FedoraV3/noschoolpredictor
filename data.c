@@ -33,10 +33,6 @@ static float usr_x, usr_y;
 */
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-#ifndef _DEBUG
-    printf("response size: %zu\n", size * nmemb);
-#endif
-
     size_t real_size = size * nmemb;
 
     response_t *p_response = (response_t *)userdata;
