@@ -1,5 +1,5 @@
 /*
- * curl.h
+ * data.h
  *
  *  Created on: Aug 18, 2026
  *      Author: ir0n1c
@@ -13,25 +13,22 @@
 
 #include <Windows.h>
 
-
-
 typedef struct WEATHER_DATA {
+
     /* Open-Meteo data */
     int64_t timestamp;
     float temperature;
     float humidity;
-    float pressure_msl;
     float wind_speed;
     float wind_gusts;
     float precipitation;
     float precipitation_probability;
     uint8_t weather_code;
-    BOOL is_day;
 
     /* Derived values */
-    float feels_like;
     float rain_intensity;
     float storm_score;
+
 } weather_data_t;
 
 typedef struct str {

@@ -6,6 +6,6 @@ cjson = dependency('libcjson')
 
 dependencies = [curl, cjson]
 
-src_files = ['ProbabilityGuesser.c', 'data.c']
+src_files = ['ProbabilityGuesser.c', 'data.c', 'predictor.c']
 
 executable('ProbabilityGuesser', src_files, dependencies: dependencies)
