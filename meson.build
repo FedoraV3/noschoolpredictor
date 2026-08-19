@@ -6,6 +6,30 @@ cjson = dependency('libcjson')
 
 dependencies = [curl, cjson]
 
-src_files = ['ProbabilityGuesser.c', 'data.c', 'predictor.c']
+# Release build flags
+build_type = get_option('buildtype')
 
-executable('ProbabilityGuesser', src_files, dependencies: dependencies)
+release_args = []
+
+if build_type == 'release'
+  if meson.get_compiler('c').get_id() == 'msvc'
+    release_args = [
+      '/O2',
+      '/DNDEBUG',
+    ]
+  else
+    release_args = [
+      '-O3',
+      '-DNDEBUG',
+      '-ffunction-sections',
+      '-fdata-sections',
+    ]
+  endif
+endif
+
+# App Icon
+win = import('windows')
+app_icon = win.compile_resources('resources.rc')
+
+src_files = ['ProbabilityGuesser.c', 'data.c', 'predictor.c']
+executable('ProbabilityGuesser', src_files, app_icon, c_args: release_args, dependencies: dependencies)

@@ -33,7 +33,7 @@ static float usr_x, usr_y;
 */
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-#ifndef NDEBUG
+#ifndef _DEBUG
     printf("response size: %zu\n", size * nmemb);
 #endif
 
@@ -125,10 +125,6 @@ BOOL curl_init() {
 	
 	snprintf(buffer, WEATHER_API_SIZE + 32, WEATHER_API_SERVICE, usr_x, usr_y);
 	
-	#ifndef NDEBUG
-		printf("%s\n", buffer);
-	#endif
-	
 	easy_handle = curl_easy_init();
 	
 	if (curl_easy_setopt(easy_handle, CURLOPT_URL, buffer) != CURLE_OK) {
@@ -160,7 +156,6 @@ BOOL get_weather_data(weather_data_t *data) {
 	curl_easy_perform(easy_handle);
 	
 	/* Deserialize */
-
 	cJSON *deserialized_response = cJSON_Parse(url_response.string);
 
 	if (deserialized_response == NULL) {
@@ -231,12 +226,6 @@ BOOL get_weather_data(weather_data_t *data) {
 	buffer.rain_intensity =
 	    buffer.precipitation *
 	    (buffer.precipitation_probability / 100.0f);
-
-	/* storm_score is calculated later by your predictor */
-	#ifndef NDEBUG
-		char* debug = cJSON_Print(deserialized_response);
-		printf("%s\n", debug);
-	#endif
 	
 	cJSON_Delete(deserialized_response);
 	*data = buffer;

@@ -48,6 +48,9 @@ int main(int argc, char **argv) {
 	
 	printf("Chances of no school: %.2f%%\n", result.probability);
 	
-	printf("Finished\n");
+
+	char buffer[64];
+	printf("Press enter to exit..");
+	fgets(buffer, sizeof(buffer), stdin);
 	return 0;
 }
