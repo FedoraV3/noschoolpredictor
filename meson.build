@@ -1,35 +1,56 @@
-project('ProbabilityGuesser', 'c')
+project(
+  'ProbabilityGuesser',
+  ['c', 'cpp'],
+  default_options: [
+    'warning_level=3',
+  ],
+)
 
 # dependencies
 curl = dependency('libcurl', required: true)
 cjson = dependency('libcjson')
 
 dependencies = [curl, cjson]
+math = meson.get_compiler('c').find_library('m', required: false)
+dependencies += math
 
-# Release build flags
+# Build-specific flags
 build_type = get_option('buildtype')
+c_compiler = meson.get_compiler('c')
 
-release_args = []
+build_args = []
+build_link_args = []
 
-if build_type == 'release'
-  if meson.get_compiler('c').get_id() == 'msvc'
-    release_args = [
-      '/O2',
-      '/DNDEBUG',
-    ]
+if build_type == 'debug' or build_type == 'debugoptimized'
+  build_args = ['-DDEBUG']
+elif build_type == 'release' or build_type == 'minsize'
+  if c_compiler.get_argument_syntax() == 'msvc'
+    build_args = ['/DNDEBUG']
+    build_link_args = ['/OPT:REF', '/OPT:ICF']
   else
-    release_args = [
-      '-O3',
+    build_args = [
       '-DNDEBUG',
       '-ffunction-sections',
       '-fdata-sections',
     ]
+    build_link_args = ['-Wl,--gc-sections']
   endif
 endif
 
-# App Icon
-win = import('windows')
-app_icon = win.compile_resources('resources.rc')
+src_files = ['src/main.c', 'src/data.c', 'src/predictor.c', 'src/news_checker.c', 'include/re.c']
 
-src_files = ['ProbabilityGuesser.c', 'data.c', 'predictor.c']
-executable('ProbabilityGuesser', src_files, app_icon, c_args: release_args, dependencies: dependencies)
+# Windows resources are unavailable on other operating systems.
+if host_machine.system() == 'windows'
+  win = import('windows')
+  src_files += win.compile_resources('resources.rc')
+endif
+
+executable(
+  'ProbabilityGuesser',
+  src_files,
+  c_args: build_args,
+  link_args: build_link_args,
+  dependencies: dependencies,
+)
+
+subdir('tests')
