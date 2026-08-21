@@ -11,6 +11,7 @@ linux and other os support will be added soon.
 # Building
 To build this project for use, first clone this repo
 > git clone https://github.com/FedoraV3/noschoolpredictor.git
+
 > cd /path/to/noschoolpredictor
 
 After that you can build it into either an executable or install it if you want. <strong>Beware that there is no uninstaller</strong>
