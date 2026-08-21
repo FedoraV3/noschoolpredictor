@@ -13,18 +13,52 @@ static const char *API_ACTOR_ID = "apify~facebook-posts-scraper";
 #define FB_PAGES_SIZE 2
 #define FB_PAGES_NOT_OLDER_THAN "1 day"
 
+/* In the final product, these will be set as options in the GUI*/
 static const char *fb_pages_to_scrape[FB_PAGES_SIZE] = {
 	"https://www.facebook.com/stacruz.lgu",
 	"https://www.facebook.com/ThePGIS1818"
 };
 
 static const char *school_suspension_regexes[] = {
+	/* English announcements. Stems also match suspended/suspension and
+	 * canceled/cancelled/cancellation. */
 	"class.*suspend",
 	"suspend.*class",
+	"class.*suspens",
+	"suspens.*class",
 	"class.*cancel",
 	"cancel.*class",
+	"no.*class",
 	"no school",
-	"walang pasok"
+	"school.*clos",
+	"clos.*school",
+	"face.to.face.*suspend",
+	"suspend.*face.to.face",
+
+	/* Common Filipino announcement wording. */
+	"walang pasok",
+	"walang klase",
+	"suspendido.*klase",
+	"suspindido.*klase",
+	"suspendido.*pasok",
+	"kanselado.*klase",
+	"kanselado.*pasok",
+	"kinansela.*klase",
+	"klase.*suspendido",
+	"klase.*kanselado"
+};
+
+static const char *school_continuation_regexes[] = {
+	"class.*not.*suspend",
+	"class.*not.*cancel",
+	"classes.*continue",
+	"classes.*resume",
+	"school.*open",
+	"may pasok",
+	"may klase",
+	"hindi.*suspendido",
+	"hindi.*suspindido",
+	"walang suspens"
 };
 
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
@@ -92,6 +126,17 @@ BOOL no_school_tomorrow(fb_post_t **fb_posts, size_t fb_posts_size) {
 			lowercase_post[j] = (char)tolower((unsigned char)post[j]);
 		}
 		lowercase_post[post_len] = '\0';
+
+		for (size_t j = 0; j < sizeof(school_continuation_regexes) / sizeof(school_continuation_regexes[0]); j++) {
+			int match_length = 0;
+			if (re_match(school_continuation_regexes[j], lowercase_post, &match_length) >= 0) {
+				free(lowercase_post);
+				lowercase_post = NULL;
+				break;
+			}
+		}
+
+		if (lowercase_post == NULL) continue;
 
 		for (size_t j = 0; j < sizeof(school_suspension_regexes) / sizeof(school_suspension_regexes[0]); j++) {
 			int match_length = 0;

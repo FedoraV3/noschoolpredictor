@@ -1,10 +1,5 @@
 #include <gtest/gtest.h>
 
-TEST(DummyTest, BuildsSuccessfully)
-{
-    EXPECT_TRUE(true);
-}
-
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);

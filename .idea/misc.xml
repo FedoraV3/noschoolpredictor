@@ -10,6 +10,11 @@
             <option value="$PROJECT_DIR$" />
           </set>
         </option>
+        <option name="profiles">
+          <MesonProfile>
+            <option name="buildDir" value="build-debug" />
+          </MesonProfile>
+        </option>
       </MesonProjectSettings>
     </option>
   </component>
