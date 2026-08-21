@@ -3,6 +3,7 @@ project(
   ['c', 'cpp'],
   default_options: [
     'warning_level=3',
+    'b_ndebug=if-release',
   ],
 )
 
@@ -25,15 +26,29 @@ if build_type == 'debug' or build_type == 'debugoptimized'
   build_args = ['-DDEBUG']
 elif build_type == 'release' or build_type == 'minsize'
   if c_compiler.get_argument_syntax() == 'msvc'
-    build_args = ['/DNDEBUG']
-    build_link_args = ['/OPT:REF', '/OPT:ICF']
+    build_args = c_compiler.get_supported_arguments(
+      '/guard:cf',
+      '/sdl',
+    )
+    build_link_args = c_compiler.get_supported_link_arguments(
+      '/DYNAMICBASE',
+      '/guard:cf',
+      '/NXCOMPAT',
+      '/OPT:ICF',
+      '/OPT:REF',
+    )
   else
-    build_args = [
-      '-DNDEBUG',
+    build_args = c_compiler.get_supported_arguments(
+      '-D_FORTIFY_SOURCE=2',
       '-ffunction-sections',
       '-fdata-sections',
-    ]
-    build_link_args = ['-Wl,--gc-sections']
+      '-fstack-protector-strong',
+    )
+    build_link_args = c_compiler.get_supported_link_arguments(
+      '-Wl,--gc-sections',
+      '-Wl,-z,noexecstack',
+      '-Wl,-z,relro,-z,now',
+    )
   endif
 endif
 
