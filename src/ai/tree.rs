@@ -156,9 +156,11 @@ pub async fn load_ai(file_path: &str) -> Result<()> {
             .fit(&training)?;
 
         // train your dragon
-        let pred = model.predict(&dataset);
-        let confusion_matrix = pred.confusion_matrix(&dataset)?;
-        println!("tree no {i} dataset results: \nAccuracy: {:.2}%", confusion_matrix.accuracy() * 100.0);
+        if cfg!(debug_assertions) {
+            let pred = model.predict(&dataset);
+            let confusion_matrix = pred.confusion_matrix(&dataset)?;
+            println!("tree no {i} dataset results: \nAccuracy: {:.2}%", confusion_matrix.accuracy() * 100.0);
+        }
 
         forest.push(ForestTree { model, features });
     }
