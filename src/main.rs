@@ -11,7 +11,7 @@ pub static APIFY_KEY: OnceLock<String> = OnceLock::new();
 async fn main() {
     /* it's a very good thing if this fails and panics the program */
     APIFY_KEY.set(env::var("APIFY_API_KEY").unwrap()).unwrap();
-    load_ai("santa_cruz_ai_training_bootstrap.csv")
+    load_ai("training.csv")
         .await
         .unwrap();
     let closure_probability = make_prediction().await.unwrap();

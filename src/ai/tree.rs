@@ -134,7 +134,7 @@ pub async fn load_ai(file_path: &str) -> Result<()> {
 
     let mut state = 0x4d59_5df4_d0f3_3173_u64;
     let mut forest = Vec::with_capacity(TREE_COUNT);
-    for _ in 0..TREE_COUNT {
+    for i in 0..TREE_COUNT {
         let features = random_features(&mut state);
         let mut samples = Vec::with_capacity(rows.len() * FEATURES_PER_TREE);
         let mut labels = Vec::with_capacity(rows.len());
@@ -144,18 +144,28 @@ pub async fn load_ai(file_path: &str) -> Result<()> {
             samples.extend(features.map(|feature| values[feature]));
             labels.push(row.suspended);
         }
-        let dataset = Dataset::new(
+        let (training, dataset) = Dataset::new(
             Array2::from_shape_vec((rows.len(), FEATURES_PER_TREE), samples)?,
             Array1::from(labels),
-        );
+        ).split_with_ratio(0.8);
         let model = DecisionTree::params()
             .split_quality(SplitQuality::Gini)
             .max_depth(Some(10))
             .min_weight_split(2.0)
             .min_weight_leaf(1.0)
-            .fit(&dataset)?;
+            .fit(&training)?;
+
+        // train your dragon
+        let pred = model.predict(&dataset);
+        let confusion_matrix = pred.confusion_matrix(&dataset)?;
+        println!("tree no {i} dataset results: \nAccuracy: {:.2}%", confusion_matrix.accuracy() * 100.0);
+
         forest.push(ForestTree { model, features });
     }
+
+    // test prediction
+
+
     TRAINED_MODEL
         .set(forest)
         .map_err(|_| anyhow!("random forest has already been trained"))
